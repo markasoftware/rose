@@ -228,6 +228,18 @@ public:
      *  This function should not be overridden by subclasses. Instead, it calls @ref may_equal to do its work. */
     bool mayEqual(const SValuePtr &other, const SmtSolverPtr &solver = SmtSolverPtr()) const /*final*/;
 
+    /** Tests if two value might overlap.
+     *
+     * Returns true if this value, with the given width, might overlap the other value, and given width. That is, if we have two
+     * ranges, one from [us,us+ourWidth], and [them,them+theirWidth], return true iff we cannot conclusively determine that the
+     * ranges are distinct. */
+    bool mayAlias(const SValuePtr &other, size_t ourWidth, size_t theirWidth, RiscOperators *ops);
+
+    /** Tests if two values certainly overlap.
+     *
+     * Like @ref mayAlias, but returns true iff we can conclusively determine that the ranges overlap. */
+    bool mustAlias(const SValuePtr &other, size_t ourWidth, size_t theirWidth, RiscOperators *ops);
+
     /** Returns true if concrete non-zero.
      *
      *  This is not virtual since it can be implemented in terms of other functions. */
@@ -314,6 +326,12 @@ public: // for backward compatibility for now, but assume protected
 
     /** Virtual API. See @ref mayEqual. */
     virtual bool may_equal(const SValuePtr &other, const SmtSolverPtr &solver = SmtSolverPtr()) const = 0;
+
+    /** Virtual API. See @ref mayAlias. */
+    virtual bool may_alias(const SValuePtr &other, size_t ourWidth, size_t theirWidth, RiscOperators *ops);
+
+    /** Virtual API. See @ref mustAlias. */
+    virtual bool must_alias(const SValuePtr &other, size_t ourWidth, size_t theirWidth, RiscOperators *ops);
 
     /** Some subclasses support the ability to add comments to values. We define no-op versions of these methods here
      *  because it makes things easier.  The base class tries to be as small as possible by not storing comments at

@@ -64,6 +64,39 @@ SValue::must_equal(const BaseSemantics::SValue::Ptr &other_, const SmtSolverPtr&
             this->offset==other->offset);
 }
 
+bool
+SValue::must_alias(const BaseSemantics::SValue::Ptr &other_, size_t ourWidth, size_t theirWidth, BaseSemantics::RiscOperators *) {
+    SValuePtr other = promote(other_);
+
+    if (name != other->name) {
+        return false;
+    }
+
+    // if they have the same name, we use the same old logic: hi1>=lo2 && hi2>=lo1
+    size_t lo1 = offset;
+    size_t hi1 = offset + ourWidth;
+    size_t lo2 = other->offset;
+    size_t hi2 = other->offset + theirWidth;
+    return hi1 >= lo2 && hi2 >= lo1;
+}
+
+bool
+SValue::may_alias(const BaseSemantics::SValue::Ptr &other_, size_t ourWidth, size_t theirWidth, BaseSemantics::RiscOperators *ops) {
+    SValuePtr other = promote(other_);
+
+    // if the names are different, we have no way to tell if they overlap.
+    if (name != other->name) {
+#ifdef PARTIAL_SYMBOLIC_UNSOUND_MAY_ALIAS
+        return false;
+#else
+        return true;
+#endif
+    }
+
+    // if they have the same name, we can determine with certainty whether they overlap.
+    return mustAlias(other_, ourWidth, theirWidth, ops);
+}
+
 void
 SValue::hash(Combinatorics::Hasher &hasher) const {
     hasher.insert(nBits());

@@ -1,5 +1,9 @@
 #ifndef ROSE_BinaryAnalysis_InstructionSemantics_PartialSymbolicSemantics_H
 #define ROSE_BinaryAnalysis_InstructionSemantics_PartialSymbolicSemantics_H
+
+///// KREO CONFIG: Comment out for sound behavior:
+#define PARTIAL_SYMBOLIC_UNSOUND_MAY_ALIAS
+
 #include <featureTests.h>
 #ifdef ROSE_ENABLE_BINARY_ANALYSIS
 
@@ -211,6 +215,10 @@ public:
     // See mustEqual
     virtual bool must_equal(const BaseSemantics::SValuePtr &other,
                             const SmtSolverPtr &solver = SmtSolverPtr()) const override;
+
+    virtual bool may_alias(const BaseSemantics::SValuePtr &other, size_t ourWidth, size_t theirWidth, BaseSemantics::RiscOperators *ops) override;
+
+    virtual bool must_alias(const BaseSemantics::SValuePtr &other, size_t ourWidth, size_t theirWidth, BaseSemantics::RiscOperators *ops) override;
 
     // See isConcrete
     virtual bool is_number() const override {
