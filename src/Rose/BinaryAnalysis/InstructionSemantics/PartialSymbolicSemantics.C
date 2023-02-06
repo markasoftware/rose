@@ -74,12 +74,14 @@ SValue::must_alias(const BaseSemantics::SValue::Ptr &other_, size_t ourWidth, si
 
     ASSERT_require(ourWidth%8 == 0);
     ASSERT_require(theirWidth%8 == 0);
+    ASSERT_require(ourWidth >= 8);
+    ASSERT_require(theirWidth >= 8);
 
     // if they have the same name, we use the same old logic: hi1>=lo2 && hi2>=lo1
     size_t lo1 = offset;
-    size_t hi1 = offset + ourWidth/8;
+    size_t hi1 = offset + ourWidth/8-1; // minus one so that we don't include the byte /after/ the high byte
     size_t lo2 = other->offset;
-    size_t hi2 = other->offset + theirWidth/8;
+    size_t hi2 = other->offset + theirWidth/8-1;
     return hi1 >= lo2 && hi2 >= lo1;
 }
 
