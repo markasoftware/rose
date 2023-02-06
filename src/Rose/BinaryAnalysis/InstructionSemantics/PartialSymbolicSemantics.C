@@ -72,26 +72,28 @@ SValue::must_alias(const BaseSemantics::SValue::Ptr &other_, size_t ourWidth, si
         return false;
     }
 
+    ASSERT_require(ourWidth%8 == 0);
+    ASSERT_require(theirWidth%8 == 0);
+
     // if they have the same name, we use the same old logic: hi1>=lo2 && hi2>=lo1
     size_t lo1 = offset;
-    size_t hi1 = offset + ourWidth;
+    size_t hi1 = offset + ourWidth/8;
     size_t lo2 = other->offset;
-    size_t hi2 = other->offset + theirWidth;
+    size_t hi2 = other->offset + theirWidth/8;
     return hi1 >= lo2 && hi2 >= lo1;
 }
 
 bool
 SValue::may_alias(const BaseSemantics::SValue::Ptr &other_, size_t ourWidth, size_t theirWidth, BaseSemantics::RiscOperators *ops) {
+
+#ifndef PARTIAL_SYMBOLIC_UNSOUND_MAY_ALIAS
     SValuePtr other = promote(other_);
 
     // if the names are different, we have no way to tell if they overlap.
     if (name != other->name) {
-#ifdef PARTIAL_SYMBOLIC_UNSOUND_MAY_ALIAS
-        return false;
-#else
         return true;
-#endif
     }
+#endif
 
     // if they have the same name, we can determine with certainty whether they overlap.
     return mustAlias(other_, ourWidth, theirWidth, ops);
